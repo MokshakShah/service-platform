@@ -8,9 +8,23 @@ type Props = {}
 
 const Settings = async (props: Props) => {
   const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || ''}/api/settings`, { cache: 'no-store' });
-  if (!res.ok) return null;
+  if (!res.ok) {
+    return (
+      <div className="flex flex-col gap-4 p-6">
+        <h1 className="text-2xl font-bold">Settings</h1>
+        <p className="text-red-500">Failed to load user settings. Please try again later.</p>
+      </div>
+    );
+  }
   const user = await res.json();
-  if (!user) return null;
+  if (!user) {
+    return (
+      <div className="flex flex-col gap-4 p-6">
+        <h1 className="text-2xl font-bold">Settings</h1>
+        <p className="text-red-500">User not found in the database. Please contact support.</p>
+      </div>
+    );
+  }
 
 
   // TODO: Move these actions to API routes or server actions triggered by HTTP request if needed
