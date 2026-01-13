@@ -2,8 +2,10 @@ import { db } from '@/lib/db';
 import { NextResponse } from 'next/server';
 
 export async function POST(req: Request) {
+  console.log('Webhook received');
   try {
     const body = await req.json();
+    console.log('Webhook body:', body);
     if (body.type !== 'user.created') {
       return NextResponse.json({ status: 'ignored', reason: 'Not a user.created event' }, { status: 200 });
     }
@@ -25,7 +27,7 @@ export async function POST(req: Request) {
     });
     return NextResponse.json({ status: 'ok' }, { status: 200 });
   } catch (error) {
-    console.error('Error updating database:', error);
+    console.error('Webhook error:', error);
     return NextResponse.json({ status: 'error', error: String(error) }, { status: 500 });
   }
 }
