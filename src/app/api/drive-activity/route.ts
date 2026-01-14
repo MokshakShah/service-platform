@@ -68,5 +68,5 @@ export async function GET() {
     }
   }
 
-  return new NextResponse('Oops! something went wrong, try again')
+  return new NextResponse('Oops!Something went wrong,pls try again')
 }

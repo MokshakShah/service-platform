@@ -7,10 +7,12 @@ import { onDiscordConnect } from './_actions/discord-connection';
 import { onNotionConnect } from './_actions/notion-connection';
 import { onSlackConnect } from './_actions/slack-connection';
 import { getUserData } from './_actions/get-user';
+import Link from 'next/link';
 
 type Props = {
   searchParams?: { [key: string]: string | undefined };
 };
+
 
 const ConnectionsClient = (props: Props) => {
   const {
@@ -54,52 +56,53 @@ const ConnectionsClient = (props: Props) => {
   };
 
   const { user } = useUser();
-  if (!user) return null;
-
-  const onUserConnections = async () => {
-    await onDiscordConnect(
-      channel_id!,
-      webhook_id!,
-      webhook_name!,
-      webhook_url!,
-      user.id,
-      guild_name!,
-      guild_id!
-    );
-    await onNotionConnect(
-      access_token!,
-      workspace_id!,
-      workspace_icon!,
-      workspace_name!,
-      database_id!,
-      user.id
-    );
-
-    await onSlackConnect(
-      app_id!,
-      authed_user_id!,
-      authed_user_token!,
-      slack_access_token!,
-      bot_user_id!,
-      team_id!,
-      team_name!,
-      user.id
-    );
-
-    const connections: any = {};
-    const user_info = await getUserData(user.id);
-    user_info?.connections.map((connection: any) => {
-      connections[connection.type] = true;
-      return (connections[connection.type] = true);
-    });
-    return { ...connections, 'Google Drive': true };
-  };
-
   const [connections, setConnections] = React.useState<any>({});
+
   React.useEffect(() => {
+    if (!user) return;
+    const onUserConnections = async () => {
+      await onDiscordConnect(
+        channel_id!,
+        webhook_id!,
+        webhook_name!,
+        webhook_url!,
+        user.id,
+        guild_name!,
+        guild_id!
+      );
+      await onNotionConnect(
+        access_token!,
+        workspace_id!,
+        workspace_icon!,
+        workspace_name!,
+        database_id!,
+        user.id
+      );
+
+      await onSlackConnect(
+        app_id!,
+        authed_user_id!,
+        authed_user_token!,
+        slack_access_token!,
+        bot_user_id!,
+        team_id!,
+        team_name!,
+        user.id
+      );
+
+      const connections: any = {};
+      const user_info = await getUserData(user.id);
+      user_info?.connections.map((connection: any) => {
+        connections[connection.type] = true;
+        return (connections[connection.type] = true);
+      });
+      return { ...connections, 'Google Drive': true };
+    };
     onUserConnections().then(setConnections);
     // eslint-disable-next-line
-  }, []);
+  }, [user]);
+
+  if (!user) return null;
 
   return (
     <div className="relative flex flex-col gap-4">
@@ -110,16 +113,42 @@ const ConnectionsClient = (props: Props) => {
         <section className="flex flex-col gap-4 p-6 text-muted-foreground">
           Connect all your apps directly from here. You may need to connect
           these apps regularly to refresh verification
-          {CONNECTIONS.map((connection) => (
-            <ConnectionCard
-              key={connection.title}
-              description={connection.description}
-              title={connection.title}
-              icon={connection.image}
-              type={connection.title}
-              connected={connections}
-            />
-          ))}
+          {CONNECTIONS.map((connection) => {
+            const { title } = connection;
+            const getHref = () => {
+              if (title === 'Discord') return process.env.NEXT_PUBLIC_DISCORD_REDIRECT || '#';
+              if (title === 'Notion') return process.env.NEXT_PUBLIC_NOTION_AUTH_URL || '#';
+              if (title === 'Slack') return process.env.NEXT_PUBLIC_SLACK_REDIRECT || '#';
+              return '#';
+            };
+
+            const href = getHref();
+
+            return (
+              <ConnectionCard
+                key={connection.title}
+                description={connection.description}
+                title={connection.title}
+                icon={connection.image}
+                type={connection.title}
+                connected={connections}
+                action={
+                  href && href !== '#' ? (
+                    <Link
+                      href={href}
+                      className="rounded-lg bg-primary p-2 font-bold text-primary-foreground"
+                    >
+                      Connect
+                    </Link>
+                  ) : (
+                    <span className="rounded-lg bg-gray-400 p-2 font-bold text-white opacity-50 cursor-not-allowed">
+                      Connect
+                    </span>
+                  )
+                }
+              />
+            );
+          })}
         </section>
       </div>
     </div>

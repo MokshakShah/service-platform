@@ -12,5 +12,5 @@ export async function POST(request: Request) {
     data: { userId, name, description },
   });
   if (workflow) return NextResponse.json({ message: 'workflow created' });
-  return NextResponse.json({ message: 'Oops! try again' }, { status: 500 });
+  return NextResponse.json({ message: 'Oops!Pls try again' }, { status: 500 });
 }

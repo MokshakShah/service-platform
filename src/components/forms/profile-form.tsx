@@ -19,10 +19,9 @@ import { Loader2 } from 'lucide-react'
 
 type Props = {
   user: any
-  onUpdate?: any
 }
 
-const ProfileForm = ({ user, onUpdate }: Props) => {
+const ProfileForm = ({ user }: Props) => {
   const [isLoading, setIsLoading] = useState(false)
   const form = useForm<z.infer<typeof EditUserProfileSchema>>({
     mode: 'onChange',
@@ -37,7 +36,7 @@ const ProfileForm = ({ user, onUpdate }: Props) => {
     values: z.infer<typeof EditUserProfileSchema>
   ) => {
     setIsLoading(true)
-    await onUpdate(values.name)
+    // Handle profile update logic here
     setIsLoading(false)
   }
 

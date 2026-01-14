@@ -1,22 +1,29 @@
 import ProfileForm from '@/components/forms/profile-form'
 import React from 'react'
 import ProfilePicture from './_components/profile-picture'
+import { auth } from '@clerk/nextjs/server'
+import { db } from '@/lib/db'
 
 
 type Props = {}
 
 
 const Settings = async (props: Props) => {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/settings`, { cache: 'no-store' });
-  if (!res.ok) {
+  const { userId } = await auth();
+  
+  if (!userId) {
     return (
       <div className="flex flex-col gap-4 p-6">
         <h1 className="text-2xl font-bold">Settings</h1>
-        {/* <p className="text-red-500">Failed to load user settings. Please try again later.</p> */}
+        <p className="text-red-500">You must be logged in to access settings.</p>
       </div>
     );
   }
-  const user = await res.json();
+
+  const user = await db.user.findUnique({
+    where: { clerkId: userId },
+  });
+
   if (!user) {
     return (
       <div className="flex flex-col gap-4 p-6">
@@ -25,12 +32,6 @@ const Settings = async (props: Props) => {
       </div>
     );
   }
-
-
-  // TODO: Move these actions to API routes or server actions triggered by HTTP request if needed
-  const removeProfileImage = async () => {};
-  const uploadProfileImage = async (image: string) => {};
-  const updateUserInfo = async (name: string) => {};
 
   return (
     <div className="flex flex-col gap-4">
@@ -45,13 +46,10 @@ const Settings = async (props: Props) => {
           </p>
         </div>
         <ProfilePicture
-          onDelete={removeProfileImage}
           userImage={user?.profileImage || ''}
-          onUpload={uploadProfileImage}
         />
         <ProfileForm
           user={user}
-          onUpdate={updateUserInfo}
         />
       </div>
     </div>

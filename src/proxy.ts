@@ -7,9 +7,6 @@ export default clerkMiddleware({
   publicRoutes: [
     '/',
     '/api/clerk-webhook',
-    '/api/settings',
-    '/api/payment-details',
-    '/api/workflows',
     '/api/drive-activity/notification',
     '/api/payment/success',
   ],

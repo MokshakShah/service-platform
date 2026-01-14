@@ -134,7 +134,7 @@ export const onCreateWorkflow = async (name: string, description: string) => {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ name, description }),
   });
-  if (!res.ok) return { message: 'Oops! try again' };
+  if (!res.ok) return { message: 'Oops!Pls try again' };
   return await res.json();
 };
 

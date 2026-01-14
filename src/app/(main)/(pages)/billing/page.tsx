@@ -1,6 +1,7 @@
-
 import BillingDashboard from './_components/billing-dashboard';
 import React from 'react';
+import { auth } from '@clerk/nextjs/server';
+import { db } from '@/lib/db';
 
 
 type Props = {
@@ -10,15 +11,19 @@ type Props = {
 
 const Billing = async (props: Props) => {
   try {
-    const { session_id } = props.searchParams ?? { session_id: '' };
-    if (!session_id) {
-      throw new Error('Session ID is missing');
+    const { userId } = await auth();
+    
+    if (!userId) {
+      return <div>Error: You must be logged in to access billing</div>;
     }
 
-    const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || ''}/api/billing?session_id=${session_id}`, { cache: 'no-store' });
-    if (!res.ok) throw new Error('Failed to fetch billing info');
-    const user = await res.json();
-    if (!user) throw new Error('User not found in the database');
+    const user = await db.user.findUnique({
+      where: { clerkId: userId },
+    });
+
+    if (!user) {
+      return <div>Error: User not found in the database</div>;
+    }
 
     return <BillingDashboard />;
   } catch (error: any) {

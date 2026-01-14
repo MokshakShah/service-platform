@@ -24,6 +24,7 @@ export default function RootLayout({
       <body>
         <ClerkProvider
           publishableKey={process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY}
+          fallbackRedirectUrl="/dashboard"
         >
           <ThemeProvider
             attribute="class"

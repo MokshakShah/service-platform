@@ -8,18 +8,19 @@ import { X } from 'lucide-react'
 
 type Props = {
   userImage: string | null
-  onDelete?: any
-  onUpload: any
 }
 
-const ProfilePicture = ({ userImage, onDelete, onUpload }: Props) => {
+const ProfilePicture = ({ userImage }: Props) => {
   const router = useRouter()
 
   const onRemoveProfileImage = async () => {
-    const response = await onDelete()
-    if (response) {
-      router.refresh()
-    }
+    // Handle profile image removal logic here
+    router.refresh()
+  }
+
+  const handleUpload = async (imageUrl: string) => {
+    // Handle upload logic here
+    router.refresh()
   }
 
   return (
@@ -43,7 +44,7 @@ const ProfilePicture = ({ userImage, onDelete, onUpload }: Props) => {
             </Button>
           </>
         ) : (
-          <UploadCareButton onUpload={onUpload} />
+          <UploadCareButton onUpload={handleUpload} />
         )}
       </div>
     </div>
