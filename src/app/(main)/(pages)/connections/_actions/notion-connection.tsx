@@ -1,7 +1,6 @@
 'use server'
 
 import { db } from '@/lib/db'
-import { useUser } from '@clerk/nextjs'
 import { Client } from '@notionhq/client'
 
 export const onNotionConnect = async (
@@ -12,9 +11,7 @@ export const onNotionConnect = async (
   database_id: string,
   id: string
 ) => {
-  'use server'
-  const { user } = useUser()
-  if (!user) {
+  if (!id) {
     throw new Error('User not authenticated')
   }
 

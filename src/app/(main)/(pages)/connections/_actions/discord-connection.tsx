@@ -1,8 +1,6 @@
 'use server'
 
 import { db } from '@/lib/db'
-import { currentUser } from '@clerk/nextjs/server'
-import { useUser } from '@clerk/nextjs'
 import axios from 'axios'
 
 export const onDiscordConnect = async (
@@ -14,8 +12,7 @@ export const onDiscordConnect = async (
   guild_name: string,
   guild_id: string
 ) => {
-  const { user } = useUser()
-  if (!user) {
+  if (!id) {
     throw new Error('User not authenticated')
   }
 

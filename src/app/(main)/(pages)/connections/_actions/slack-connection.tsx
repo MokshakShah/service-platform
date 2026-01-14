@@ -2,7 +2,6 @@
 
 import { Option } from '@/components/ui/multiple-selector'
 import { db } from '@/lib/db'
-import { useUser } from '@clerk/nextjs'
 import axios from 'axios'
 
 export const onSlackConnect = async (
@@ -15,8 +14,7 @@ export const onSlackConnect = async (
   team_name: string,
   user_id: string
 ): Promise<void> => {
-  const { user } = useUser()
-  if (!user) {
+  if (!user_id) {
     throw new Error('User not authenticated')
   }
 
@@ -46,14 +44,13 @@ export const onSlackConnect = async (
   }
 }
 
-export const getSlackConnection = async () => {
-  const { user } = useUser()
-  if (user) {
-    return await db.slack.findFirst({
-      where: { userId: user.id },
-    })
+export const getSlackConnection = async (userId: string) => {
+  if (!userId) {
+    return null
   }
-  return null
+  return await db.slack.findFirst({
+    where: { userId },
+  })
 }
 
 export async function listBotChannels(
