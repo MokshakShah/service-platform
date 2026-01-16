@@ -3,6 +3,7 @@ import { EditorCanvasTypes, EditorNodeType } from '@/lib/types'
 import { useNodeConnections } from '@/providers/connections-provider'
 import { useEditor } from '@/providers/editor-provider'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { useUser } from '@clerk/nextjs'
 
 import React, { useEffect } from 'react'
 import { Separator } from '@/components/ui/separator'
@@ -37,11 +38,13 @@ const EditorCanvasSidebar = ({ nodes }: Props) => {
   const { state } = useEditor()
   const { nodeConnection } = useNodeConnections()
   const { googleFile, setSlackChannels } = useFuzzieStore()
+  const { user } = useUser()
+  
   useEffect(() => {
-    if (state) {
-      onConnections(nodeConnection, state, googleFile)
+    if (state && user?.id) {
+      onConnections(nodeConnection, state, googleFile, user.id)
     }
-  }, [state])
+  }, [state, user?.id])
 
   useEffect(() => {
     if (nodeConnection.slackNode.slackAccessToken) {

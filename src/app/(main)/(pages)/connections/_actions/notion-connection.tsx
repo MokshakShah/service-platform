@@ -1,6 +1,7 @@
 'use server'
 
 import { db } from '@/lib/db'
+import { auth } from '@clerk/nextjs/server'
 import { Client } from '@notionhq/client'
 
 export const onNotionConnect = async (
@@ -52,11 +53,11 @@ export const onNotionConnect = async (
   }
 }
 export const getNotionConnection = async () => {
-  const { user } = useUser()
-  if (user) {
+  const { userId } = await auth()
+  if (userId) {
     const connection = await db.notion.findFirst({
       where: {
-        userId: user.id,
+        userId: userId,
       },
     })
     if (connection) {

@@ -89,7 +89,8 @@ export const onAddTemplate = (
 export const onConnections = async (
   nodeConnection: ConnectionProviderProps,
   editorState: EditorState,
-  googleFile: any
+  googleFile: any,
+  userId: string
 ) => {
   if (editorState.editor.selectedNode.data.title == 'Discord') {
     const connection = await getDiscordConnectionUrl()
@@ -125,7 +126,7 @@ export const onConnections = async (
     }
   }
   if (editorState.editor.selectedNode.data.title == 'Slack') {
-    const connection = await getSlackConnection()
+    const connection = await getSlackConnection(userId)
     if (connection) {
       nodeConnection.setSlackNode({
         appId: connection.appId,

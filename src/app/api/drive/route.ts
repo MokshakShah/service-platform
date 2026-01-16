@@ -11,17 +11,18 @@ export async function GET() {
     process.env.OAUTH2_REDIRECT_URI
   )
 
-  const { userId } = auth()
+  const { userId } = await auth()
   if (!userId) {
     return NextResponse.json({ message: 'User not found' })
   }
 
-  const clerkResponse = await clerkClient.users.getUserOauthAccessToken(
+  const clerk = await clerkClient()
+  const clerkResponse = await clerk.users.getUserOauthAccessToken(
     userId,
     'oauth_google'
   )
 
-  const accessToken = clerkResponse[0].token
+  const accessToken = clerkResponse.data[0].token
   oauth2Client.setCredentials({
     access_token: accessToken,
   })

@@ -24,14 +24,9 @@ export default function RootLayout({
       <body>
         <ClerkProvider
           publishableKey={process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY}
-          fallbackRedirectUrl="/dashboard"
+          signInFallbackRedirectUrl="/dashboard"
         >
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="system"
-            enableSystem
-            disableTransitionOnChange
-          >
+          <ThemeProvider>
             <BillingProvider>
               <ModalProvider>
                 {children}

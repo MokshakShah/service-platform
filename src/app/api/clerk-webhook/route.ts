@@ -1,7 +1,7 @@
 import { db } from '@/lib/db';
-import { NextResponse } from 'next/server';
+import { NextResponse, NextRequest } from 'next/server';
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   console.log('Webhook received');
   try {
     const body = await req.json();
