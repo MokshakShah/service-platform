@@ -1,6 +1,7 @@
 'use client'
 
 import React from 'react'
+import axios from 'axios'
 
 type BillingProviderProps = {
   credits: string
@@ -10,9 +11,9 @@ type BillingProviderProps = {
 }
 
 const initialValues: BillingProviderProps = {
-  credits: '',
+  credits: '0',
   setCredits: () => undefined,
-  tier: '',
+  tier: 'Free',
   setTier: () => undefined,
 }
 
@@ -26,6 +27,24 @@ const { Provider } = context
 export const BillingProvider = ({ children }: WithChildProps) => {
   const [credits, setCredits] = React.useState(initialValues.credits)
   const [tier, setTier] = React.useState(initialValues.tier)
+
+  React.useEffect(() => {
+    const fetchUserBillingData = async () => {
+      try {
+        const { data } = await axios.get('/api/payment-details')
+        if (data) {
+          setCredits(data.credits?.toString() || '0')
+          setTier(data.tier || 'Free')
+        }
+      } catch (error) {
+        console.error('Failed to fetch billing data:', error)
+        setCredits('0')
+        setTier('Free')
+      }
+    }
+
+    fetchUserBillingData()
+  }, [])
 
   const values = {
     credits,

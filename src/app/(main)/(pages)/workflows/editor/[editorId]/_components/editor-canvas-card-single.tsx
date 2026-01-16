@@ -50,13 +50,13 @@ const EditorCanvasCardSingle = ({ data }: { data: EditorCanvasCardType }) => {
           <div>{logo}</div>
           <div>
             <CardTitle className="text-md">{data.title}</CardTitle>
-            <CardDescription>
-              <p className="text-xs text-muted-foreground/50">
+            <div className="text-sm text-muted-foreground space-y-1">
+              <div className="text-xs text-muted-foreground/50">
                 <b className="text-muted-foreground/80">ID: </b>
                 {nodeId}
-              </p>
-              <p>{data.description}</p>
-            </CardDescription>
+              </div>
+              <div>{data.description}</div>
+            </div>
           </div>
         </CardHeader>
         <Badge

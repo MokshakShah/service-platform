@@ -3,6 +3,7 @@ import { Option } from '@/components/ui/multiple-selector';
 import { db } from '@/lib/db';
 import { headers } from 'next/headers';
 import { getAuth } from '@clerk/nextjs/server';
+import { auth } from '@clerk/nextjs/server';
 
 export const getGoogleListener = async () => {
   const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || ''}/api/google-listener`, { cache: 'no-store' });
@@ -129,13 +130,30 @@ export const onCreateNodeTemplate = async (
 
 
 export const onCreateWorkflow = async (name: string, description: string) => {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || ''}/api/create-workflow`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ name, description }),
-  });
-  if (!res.ok) return { message: 'Oops!Pls try again' };
-  return await res.json();
+  try {
+    const { userId } = await auth();
+    
+    if (!userId) {
+      return { message: 'Unauthorized' };
+    }
+
+    const workflow = await db.workflows.create({
+      data: {
+        userId,
+        name,
+        description,
+      },
+    });
+
+    if (workflow) {
+      return { message: 'Workflow created' };
+    }
+
+    return { message: 'Failed to create workflow' };
+  } catch (error: any) {
+    console.error('Create workflow error:', error);
+    return { message: error?.message || 'Oops!Pls try again' };
+  }
 };
 
 export const onGetNodesEdges = async (flowId: string) => {
