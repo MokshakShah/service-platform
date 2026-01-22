@@ -72,13 +72,14 @@ export const onCreateNodeTemplate = async (
 
       if (channelList) {
         //remove duplicates before insert
+
         const NonDuplicated = channelList.slackChannels.filter(
-          (channel) => channel !== channels![0].value
+          (channel: string) => channel !== channels![0].value
         );
 
         NonDuplicated!
-          .map((channel) => channel)
-          .forEach(async (channel) => {
+          .map((channel: string) => channel)
+          .forEach(async (channel: string) => {
             await db.workflows.update({
               where: {
                 id: workflowId,
