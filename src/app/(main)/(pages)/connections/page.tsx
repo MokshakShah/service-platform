@@ -9,12 +9,13 @@ import { getUserData } from './_actions/get-user'
 import ConnectionsClient from './ConnectionsClient'
 
 type Props = {
-  searchParams?: { [key: string]: string | undefined }
+  searchParams?: Promise<{ [key: string]: string | undefined }>
 }
 
 
-const Connections = (props: Props) => {
-  return <ConnectionsClient {...props} />;
+const Connections = async (props: Props) => {
+  const searchParams = await props?.searchParams;
+  return <ConnectionsClient searchParams={searchParams} />;
 };
 
 export default Connections;

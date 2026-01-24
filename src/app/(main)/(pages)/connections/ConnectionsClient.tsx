@@ -55,52 +55,75 @@ const ConnectionsClient = (props: Props) => {
     team_name: '',
   };
 
+  // console.log('ConnectionsClient received searchParams:');
+  // if (slack_access_token) console.log('  slack_access_token:', slack_access_token.substring(0, 20) + '...');
+  // if (app_id) console.log('  app_id:', app_id);
+  // if (authed_user_id) console.log('  authed_user_id:', authed_user_id);
+  if (access_token) console.log('  Notion access_token:', access_token.substring(0, 20) + '...');
+  if (workspace_id) console.log('  Notion workspace_id:', workspace_id);
+
   const { user } = useUser();
   const [connections, setConnections] = React.useState<any>({});
 
   React.useEffect(() => {
     if (!user) return;
     const onUserConnections = async () => {
-      await onDiscordConnect(
-        channel_id!,
-        webhook_id!,
-        webhook_name!,
-        webhook_url!,
-        user.id,
-        guild_name!,
-        guild_id!
-      );
-      await onNotionConnect(
-        access_token!,
-        workspace_id!,
-        workspace_icon!,
-        workspace_name!,
-        database_id!,
-        user.id
-      );
+      try {
+        if (channel_id) {
+          await onDiscordConnect(
+            channel_id!,
+            webhook_id!,
+            webhook_name!,
+            webhook_url!,
+            user.id,
+            guild_name!,
+            guild_id!
+          );
+        }
 
-      await onSlackConnect(
-        app_id!,
-        authed_user_id!,
-        authed_user_token!,
-        slack_access_token!,
-        bot_user_id!,
-        team_id!,
-        team_name!,
-        user.id
-      );
+        if (access_token) {
+          console.log('Connecting Notion with token:', access_token.substring(0, 20) + '...');
+          await onNotionConnect(
+            access_token!,
+            workspace_id!,
+            workspace_icon!,
+            workspace_name!,
+            database_id!,
+            user.id
+          );
+          console.log('Notion connected successfully');
+        }
 
-      const connections: any = {};
-      const user_info = await getUserData(user.id);
-      user_info?.connections.map((connection: any) => {
-        connections[connection.type] = true;
-        return (connections[connection.type] = true);
-      });
-      return { ...connections, 'Google Drive': true };
+        if (slack_access_token) {
+          await onSlackConnect(
+            app_id!,
+            authed_user_id!,
+            authed_user_token!,
+            slack_access_token!,
+            bot_user_id!,
+            team_id!,
+            team_name!,
+            user.id
+          );
+        }
+
+        const connections: any = {};
+        const user_info = await getUserData(user.id);
+        console.log('User connections from DB:', user_info?.connections);
+        user_info?.connections.map((connection: any) => {
+          connections[connection.type] = true;
+          return (connections[connection.type] = true);
+        });
+        console.log('Final connections state:', connections);
+        return connections;
+      } catch (error) {
+        console.error('Error connecting services:', error);
+        return {};
+      }
     };
     onUserConnections().then(setConnections);
     // eslint-disable-next-line
-  }, [user]);
+  }, [user, channel_id, access_token, slack_access_token]);
 
   if (!user) return null;
 
@@ -118,11 +141,16 @@ const ConnectionsClient = (props: Props) => {
             const getHref = () => {
               if (title === 'Discord') return process.env.NEXT_PUBLIC_DISCORD_REDIRECT || '#';
               if (title === 'Notion') return process.env.NEXT_PUBLIC_NOTION_AUTH_URL || '#';
-              if (title === 'Slack') return process.env.NEXT_PUBLIC_SLACK_REDIRECT || '#';
+              if (title === 'Slack') {
+                const slackRedirect = process.env.NEXT_PUBLIC_SLACK_REDIRECT || '#';
+                console.log('Slack Redirect URL:', slackRedirect);
+                return slackRedirect;
+              }
               return '#';
             };
 
             const href = getHref();
+            if (title === 'Slack') console.log('Slack href:', href);
 
             return (
               <ConnectionCard
@@ -136,7 +164,7 @@ const ConnectionsClient = (props: Props) => {
                   href && href !== '#' ? (
                     <Link
                       href={href}
-                      className="rounded-lg bg-primary p-2 font-bold text-primary-foreground"
+                      className="rounded-lg bg-gray-600 p-2 font-bold text-white hover:bg-gray-700"
                     >
                       Connect
                     </Link>

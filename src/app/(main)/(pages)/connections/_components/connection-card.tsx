@@ -45,17 +45,19 @@ const ConnectionCard = ({
         </div>
       </CardHeader>
       <div className="flex flex-col items-center gap-2 p-4">
-            {/* {connected[type] ? (
-              <div className="border-bg-primary rounded-lg border-2 px-3 py-2 font-bold text-white">
-                Connected
-              </div>
-            ) : ( */}
-          {action || (
-            <span className="rounded-lg bg-gray-400 p-2 font-bold text-white opacity-50 cursor-not-allowed">
-              Connect
-            </span>
-          )}
-        {/* )} */}
+        {connected[type] ? (
+          <span className="rounded-lg bg-gray-400 p-2 font-bold text-white opacity-50 cursor-not-allowed">
+            Connect
+          </span>
+        ) : (
+          <>
+            {action || (
+              <span className="rounded-lg bg-gray-400 p-2 font-bold text-white opacity-50 cursor-not-allowed">
+                Connect
+              </span>
+            )}
+          </>
+        )}
       </div>
     </Card>
   )
