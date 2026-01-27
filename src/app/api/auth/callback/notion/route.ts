@@ -37,19 +37,18 @@ export async function GET(req: NextRequest) {
       });
       
       const databasesPages = await notion.search({
-        filter: {
-          property: 'object',
-          value: 'database',
-        },
         sort: {
           direction: 'ascending',
           timestamp: 'last_edited_time',
         },
       });
       
-      const databaseId = databasesPages?.results?.length
-        ? databasesPages.results[0].id
-        : '';
+      // Filter for database objects since search returns both pages and databases
+      const databases = databasesPages?.results?.filter(
+        (result: any) => result.object === 'database'
+      );
+      
+      const databaseId = databases?.length ? databases[0].id : '';
 
       console.log('Database ID found:', databaseId);
 

@@ -2,6 +2,8 @@ import React from 'react'
 import WorkflowButton from './_components/workflow-button'
 import Workflows from './_components'
 
+export const dynamic = 'force-dynamic';
+
 type Props = {}
 
 const Page = (props: Props) => {
