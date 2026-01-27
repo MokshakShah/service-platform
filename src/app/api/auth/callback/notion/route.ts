@@ -38,7 +38,8 @@ export async function GET(req: NextRequest) {
       
       const databasesPages = await notion.search({
         filter: {
-          object: 'database',
+          property: 'object',
+          value: 'database',
         },
         sort: {
           direction: 'ascending',
