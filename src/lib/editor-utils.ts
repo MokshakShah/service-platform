@@ -110,11 +110,7 @@ export const onConnections = async (
         accessToken: connection.accessToken,
         databaseId: connection.databaseId,
         workspaceName: connection.workspaceName,
-        content: {
-          name: googleFile.name,
-          kind: googleFile.kind,
-          type: googleFile.mimeType,
-        },
+        content: googleFile?.name ? `File: ${googleFile.name}` : '',
       })
 
       if (nodeConnection.notionNode.databaseId !== '') {

@@ -43,10 +43,16 @@ export async function GET(req: NextRequest) {
         },
       });
       
+      console.log('Search results count:', databasesPages?.results?.length);
+      console.log('Search results:', databasesPages?.results?.map((r: any) => ({ object: r.object, id: r.id })));
+      
       // Filter for database objects since search returns both pages and databases
       const databases = databasesPages?.results?.filter(
         (result: any) => result.object === 'database'
       );
+      
+      console.log('Databases found:', databases?.length);
+      console.log('Databases:', databases?.map((db: any) => ({ id: db.id, title: db.title })));
       
       const databaseId = databases?.length ? databases[0].id : '';
 

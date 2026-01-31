@@ -17,94 +17,31 @@ export const onNotionConnect = async (
   }
 
   if (access_token) {
-    //check if notion is connected
-    const notion_connected = await db.notion.findFirst({
+    // Upsert Notion connection: update if exists, create if not
+    await db.notion.upsert({
       where: {
+        userId: id,
+      },
+      update: {
+        workspaceIcon: workspace_icon!,
         accessToken: access_token,
+        workspaceId: workspace_id!,
+        workspaceName: workspace_name!,
+        databaseId: database_id,
       },
-      include: {
+      create: {
+        userId: id,
+        workspaceIcon: workspace_icon!,
+        accessToken: access_token,
+        workspaceId: workspace_id!,
+        workspaceName: workspace_name!,
+        databaseId: database_id,
         connections: {
-          select: {
-            type: true,
+          create: {
+            userId: id,
+            type: 'Notion',
           },
         },
       },
     })
-
-    if (!notion_connected) {
-      //create connection
-      await db.notion.create({
-        data: {
-          userId: id,
-          workspaceIcon: workspace_icon!,
-          accessToken: access_token,
-          workspaceId: workspace_id!,
-          workspaceName: workspace_name!,
-          databaseId: database_id,
-          connections: {
-            create: {
-              userId: id,
-              type: 'Notion',
-            },
-          },
-        },
-      })
-    }
   }
-}
-export const getNotionConnection = async () => {
-  const { userId } = await auth()
-  if (userId) {
-    const connection = await db.notion.findFirst({
-      where: {
-        userId: userId,
-      },
-    })
-    if (connection) {
-      return connection
-    }
-  }
-}
-
-export const getNotionDatabase = async (
-  databaseId: string,
-  accessToken: string
-) => {
-  const notion = new Client({
-    auth: accessToken,
-  })
-  const response = await notion.databases.retrieve({ database_id: databaseId })
-  return response
-}
-
-export const onCreateNewPageInDatabase = async (
-  databaseId: string,
-  accessToken: string,
-  content: string
-) => {
-  const notion = new Client({
-    auth: accessToken,
-  })
-
-  // console.log(databaseId)
-  const response = await notion.pages.create({
-    parent: {
-      type: 'database_id',
-      database_id: databaseId,
-    },
-    properties: {
-        name: {
-          title: [
-            {
-              text: {
-                content: content,
-              },
-            },
-          ],
-        },
-    },
-  })
-  if (response) {
-    return response
-  }
-}

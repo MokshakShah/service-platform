@@ -13,26 +13,40 @@ export async function GET() {
 
   const { userId } = await auth()
   if (!userId) {
-    return NextResponse.json({ message: 'User not found' })
+    return NextResponse.json({ message: 'User not found' }, { status: 401 })
   }
 
-  const clerk = await clerkClient()
-  const clerkResponse = await clerk.users.getUserOauthAccessToken(
-    userId,
-    'oauth_google'
-  )
-
-  const accessToken = clerkResponse.data[0].token
-  oauth2Client.setCredentials({
-    access_token: accessToken,
-  })
-
-  const drive = google.drive({
-    version: 'v3',
-    auth: oauth2Client,
-  })
-  
   try {
+    const clerk = await clerkClient()
+    const clerkResponse = await clerk.users.getUserOauthAccessToken(
+      userId,
+      'google'
+    )
+
+    if (!clerkResponse?.data || clerkResponse.data.length === 0) {
+      return NextResponse.json(
+        { message: 'Google account not connected. Please connect your Google account first.' },
+        { status: 400 }
+      )
+    }
+
+    const accessToken = clerkResponse.data[0]?.token
+    if (!accessToken) {
+      return NextResponse.json(
+        { message: 'Failed to retrieve Google access token' },
+        { status: 400 }
+      )
+    }
+
+    oauth2Client.setCredentials({
+      access_token: accessToken,
+    })
+
+    const drive = google.drive({
+      version: 'v3',
+      auth: oauth2Client,
+    })
+    
     const response = await drive.files.list()
 
     if (response) {
@@ -54,10 +68,12 @@ export async function GET() {
         }
       )
     }
-  } catch (error) {
+  } catch (error: any) {
+    console.error('Drive API error:', error)
     return Response.json(
       {
         message: 'Something went wrong',
+        error: error?.message || 'Unknown error',
       },
       {
         status: 500,

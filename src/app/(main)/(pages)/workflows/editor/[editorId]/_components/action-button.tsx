@@ -39,21 +39,40 @@ const ActionButton = ({
   }, [nodeConnection.discordNode])
 
   const onStoreNotionContent = useCallback(async () => {
-    console.log(
-      nodeConnection.notionNode.databaseId,
-      nodeConnection.notionNode.accessToken,
-      nodeConnection.notionNode.content
-    )
-    const response = await onCreateNewPageInDatabase(
-      nodeConnection.notionNode.databaseId,
-      nodeConnection.notionNode.accessToken,
-      nodeConnection.notionNode.content
-    )
-    if (response) {
-      nodeConnection.setNotionNode((prev: any) => ({
-        ...prev,
-        content: '',
-      }))
+    try {
+      if (!nodeConnection.notionNode.databaseId) {
+        toast.error('Database not configured. Please select a database.')
+        return
+      }
+      if (!nodeConnection.notionNode.accessToken) {
+        toast.error('Notion not connected. Please connect your Notion account.')
+        return
+      }
+      if (!nodeConnection.notionNode.content) {
+        toast.error('Please enter content before sending.')
+        return
+      }
+
+      console.log(
+        nodeConnection.notionNode.databaseId,
+        nodeConnection.notionNode.accessToken,
+        nodeConnection.notionNode.content
+      )
+      const response = await onCreateNewPageInDatabase(
+        nodeConnection.notionNode.databaseId,
+        nodeConnection.notionNode.accessToken,
+        nodeConnection.notionNode.content
+      )
+      if (response) {
+        toast.success('Page created successfully in Notion')
+        nodeConnection.setNotionNode((prev: any) => ({
+          ...prev,
+          content: '',
+        }))
+      }
+    } catch (error: any) {
+      console.error('Error creating Notion page:', error)
+      toast.error(error?.message || 'Failed to create page in Notion')
     }
   }, [nodeConnection.notionNode])
 

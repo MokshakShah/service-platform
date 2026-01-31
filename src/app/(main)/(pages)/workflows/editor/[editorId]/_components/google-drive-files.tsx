@@ -15,11 +15,17 @@ const GoogleDriveFiles = (props: Props) => {
 
   const reqGoogle = async () => {
     setLoading(true)
-    const response = await axios.get('/api/drive-activity')
-    if (response) {
-      toast.message(response.data)
+    try {
+      const response = await axios.get('/api/drive-activity')
+      if (response) {
+        toast.message(response.data)
+        setLoading(false)
+        setIsListening(true)
+      }
+    } catch (error: any) {
+      console.error('Error setting up Google listener:', error)
+      toast.error(error?.response?.data?.message || 'Failed to set up listener')
       setLoading(false)
-      setIsListening(true)
     }
     setIsListening(false)
   }

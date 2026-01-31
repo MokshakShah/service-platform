@@ -54,19 +54,51 @@ const ContentBasedOnTitle = ({
 
   useEffect(() => {
     const reqGoogle = async () => {
-      const response: { data: { message: { files: any } } } = await axios.get(
-        '/api/drive'
-      )
-      if (response) {
-        console.log(response.data.message.files[0])
-        toast.message("Fetched File")
-        setFile(response.data.message.files[0])
-      } else {
-        toast.error('Something went wrong')
+      try {
+        const response: { data: { message: { files: any } } } = await axios.get(
+          '/api/drive'
+        )
+        if (response) {
+          console.log(response.data.message.files[0])
+          toast.message("Fetched File")
+          setFile(response.data.message.files[0])
+        } else {
+          toast.error('Something went wrong')
+        }
+      } catch (error: any) {
+        console.error('Error fetching Google Drive files:', error)
+        toast.error(error?.response?.data?.message || 'Failed to fetch Google Drive files')
       }
     }
-    reqGoogle()
-  }, [])
+    
+    const loadNotionConnection = async () => {
+      try {
+        const response = await axios.get('/api/connections')
+        console.log('Connections API response:', response.data)
+        if (response?.data?.notion) {
+          console.log('Notion connection found, setting notionNode:', response.data.notion)
+          nodeConnection.setNotionNode((prev: any) => ({
+            ...prev,
+            accessToken: response.data.notion.accessToken,
+            databaseId: response.data.notion.databaseId,
+            workspaceName: response.data.notion.workspaceName,
+          }))
+        } else {
+          console.log('No Notion connection found')
+          toast.error('Database not configured. Please connect Notion in Connections first.')
+        }
+      } catch (error: any) {
+        console.error('Error loading Notion connection:', error)
+        toast.error('Failed to load Notion connection')
+      }
+    }
+
+    if (title === 'Notion') {
+      loadNotionConnection()
+    } else if (title === 'Google Drive') {
+      reqGoogle()
+    }
+  }, [title])
 
   // @ts-ignore
   const nodeConnectionType: any = nodeConnection[nodeMapper[title]]
