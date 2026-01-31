@@ -1,7 +1,7 @@
 'use client'
 
 import React from 'react'
-import axios from 'axios'
+import { onPaymentDetails } from '@/app/(main)/(pages)/billing/_actions/payment-connecetions'
 
 type BillingProviderProps = {
   credits: string
@@ -31,7 +31,7 @@ export const BillingProvider = ({ children }: WithChildProps) => {
   React.useEffect(() => {
     const fetchUserBillingData = async () => {
       try {
-        const { data } = await axios.get('/api/payment-details')
+        const data = await onPaymentDetails()
         if (data) {
           setCredits(data.credits?.toString() || '0')
           setTier(data.tier || 'Free')

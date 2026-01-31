@@ -2,7 +2,6 @@
 import { Option } from '@/components/ui/multiple-selector';
 import { db } from '@/lib/db';
 import { headers } from 'next/headers';
-import { getAuth } from '@clerk/nextjs/server';
 import { auth } from '@clerk/nextjs/server';
 
 export const getGoogleListener = async () => {
