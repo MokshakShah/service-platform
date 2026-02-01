@@ -23,6 +23,8 @@ export async function POST(req: NextRequest) {
         email,
         name: user.first_name || '',
         profileImage: user.image_url || '',
+        credits: '10', // Explicitly set default credits
+        tier: 'Free', // Explicitly set default tier
       },
     });
     return NextResponse.json({ status: 'ok' }, { status: 200 });

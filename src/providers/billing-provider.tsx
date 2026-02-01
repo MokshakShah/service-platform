@@ -31,13 +31,26 @@ export const BillingProvider = ({ children }: WithChildProps) => {
   React.useEffect(() => {
     const fetchUserBillingData = async () => {
       try {
+        console.log('BillingProvider: Fetching user billing data...');
         const data = await onPaymentDetails()
+        console.log('BillingProvider: Received data:', data);
+        
         if (data) {
-          setCredits(data.credits?.toString() || '0')
-          setTier(data.tier || 'Free')
+          const newCredits = data.credits?.toString() || '0';
+          const newTier = data.tier || 'Free';
+          
+          console.log('BillingProvider: Setting credits to:', newCredits);
+          console.log('BillingProvider: Setting tier to:', newTier);
+          
+          setCredits(newCredits)
+          setTier(newTier)
+        } else {
+          console.log('BillingProvider: No data received, using defaults');
+          setCredits('0')
+          setTier('Free')
         }
       } catch (error) {
-        console.error('Failed to fetch billing data:', error)
+        console.error('BillingProvider: Failed to fetch billing data:', error)
         setCredits('0')
         setTier('Free')
       }

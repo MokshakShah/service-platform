@@ -55,26 +55,38 @@ const ContentBasedOnTitle = ({
   useEffect(() => {
     const reqGoogle = async () => {
       try {
+        console.log('Fetching Google Drive files...')
         const response: { data: { message: { files: any } } } = await axios.get(
           '/api/drive'
         )
-        if (response) {
-          console.log(response.data.message.files[0])
+        if (response?.data?.message?.files) {
+          console.log('Google Drive files fetched:', response.data.message.files[0])
           toast.message("Fetched File")
           setFile(response.data.message.files[0])
         } else {
-          toast.error('Something went wrong')
+          console.log('No files found in Google Drive response')
+          toast.error('No files found')
         }
       } catch (error: any) {
         console.error('Error fetching Google Drive files:', error)
-        toast.error(error?.response?.data?.message || 'Failed to fetch Google Drive files')
+        console.error('Error response:', error?.response?.data)
+        
+        if (error?.response?.status === 400) {
+          toast.error('Please connect your Google account first in Connections')
+        } else if (error?.response?.status === 401) {
+          toast.error('Please sign in to access Google Drive')
+        } else {
+          toast.error(error?.response?.data?.message || 'Failed to fetch Google Drive files')
+        }
       }
     }
     
     const loadNotionConnection = async () => {
       try {
+        console.log('Loading Notion connection...')
         const response = await axios.get('/api/connections')
         console.log('Connections API response:', response.data)
+        
         if (response?.data?.notion) {
           console.log('Notion connection found, setting notionNode:', response.data.notion)
           nodeConnection.setNotionNode((prev: any) => ({
@@ -83,13 +95,15 @@ const ContentBasedOnTitle = ({
             databaseId: response.data.notion.databaseId,
             workspaceName: response.data.notion.workspaceName,
           }))
+          toast.success('Notion connection loaded')
         } else {
           console.log('No Notion connection found')
           toast.error('Database not configured. Please connect Notion in Connections first.')
         }
       } catch (error: any) {
         console.error('Error loading Notion connection:', error)
-        toast.error('Failed to load Notion connection')
+        console.error('Error response:', error?.response?.data)
+        toast.error(error?.response?.data?.message || 'Failed to load Notion connection')
       }
     }
 
