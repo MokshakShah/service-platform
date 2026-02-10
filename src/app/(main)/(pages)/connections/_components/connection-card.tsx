@@ -46,8 +46,8 @@ const ConnectionCard = ({
       </CardHeader>
       <div className="flex flex-col items-center gap-2 p-4">
         {connected[type] ? (
-          <span className="rounded-lg bg-gray-400 p-2 font-bold text-white opacity-50 cursor-not-allowed">
-            Connect
+          <span className="rounded-lg bg-green-600 p-2 font-bold text-white">
+            Connected
           </span>
         ) : (
           <>

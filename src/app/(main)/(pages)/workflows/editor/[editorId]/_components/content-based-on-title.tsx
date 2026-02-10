@@ -11,11 +11,11 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { onContentChange } from '@/lib/editor-utils'
 import GoogleFileDetails from './google-file-details'
 import GoogleDriveFiles from './google-drive-files'
 import ActionButton from './action-button'
-import { getFileMetaData } from '@/app/(main)/(pages)/connections/_actions/google-connection'
 import axios from 'axios'
 import { toast } from 'sonner'
 
@@ -52,6 +52,9 @@ const ContentBasedOnTitle = ({
   const { selectedNode } = newState.editor
   const title = selectedNode.data.title
 
+  const [driveFiles, setDriveFiles] = React.useState<any[]>([])
+  const [selectedFileId, setSelectedFileId] = React.useState<string>('')
+
   useEffect(() => {
     const reqGoogle = async () => {
       try {
@@ -60,9 +63,14 @@ const ContentBasedOnTitle = ({
           '/api/drive'
         )
         if (response?.data?.message?.files) {
-          console.log('Google Drive files fetched:', response.data.message.files[0])
-          toast.message("Fetched File")
-          setFile(response.data.message.files[0])
+          console.log('Google Drive files fetched:', response.data.message.files)
+          toast.message("Files fetched successfully")
+          setDriveFiles(response.data.message.files)
+          // Set first file as default selection
+          if (response.data.message.files.length > 0) {
+            setFile(response.data.message.files[0])
+            setSelectedFileId(response.data.message.files[0].id)
+          }
         } else {
           console.log('No files found in Google Drive response')
           toast.error('No files found')
@@ -80,7 +88,7 @@ const ContentBasedOnTitle = ({
         }
       }
     }
-    
+
     const loadNotionConnection = async () => {
       try {
         console.log('Loading Notion connection...')
@@ -95,7 +103,13 @@ const ContentBasedOnTitle = ({
             databaseId: response.data.notion.databaseId,
             workspaceName: response.data.notion.workspaceName,
           }))
-          toast.success('Notion connection loaded')
+          
+          // Check if database is configured
+          if (response.data.notion.databaseId) {
+            toast.success('Notion connection loaded successfully')
+          } else {
+            toast.error('Database not configured. Please select a database in your Notion connection.')
+          }
         } else {
           console.log('No Notion connection found')
           toast.error('Database not configured. Please connect Notion in Connections first.')
@@ -122,16 +136,15 @@ const ContentBasedOnTitle = ({
     title === 'Google Drive'
       ? !nodeConnection.isLoading
       : !!nodeConnectionType[
-          `${
-            title === 'Slack'
-              ? 'slackAccessToken'
-              : title === 'Discord'
-              ? 'webhookURL'
-              : title === 'Notion'
-              ? 'accessToken'
-              : ''
-          }`
-        ]
+      `${title === 'Slack'
+        ? 'slackAccessToken'
+        : title === 'Discord'
+          ? 'webhookURL'
+          : title === 'Notion'
+            ? 'accessToken'
+            : ''
+      }`
+      ]
 
   if (!isConnected) return <p>Not connected</p>
 
@@ -169,7 +182,58 @@ const ContentBasedOnTitle = ({
               </CardContent>
             </Card>
           )}
-          {title === 'Google Drive' && <GoogleDriveFiles />}
+          {title === 'Google Drive' && (
+            <div className="flex flex-col gap-3">
+              {driveFiles.length > 0 ? (
+                <>
+                  <p>Select a file from your Google Drive:</p>
+                  <Select
+                    value={selectedFileId}
+                    onValueChange={(value) => {
+                      setSelectedFileId(value)
+                      const selectedFile = driveFiles.find(f => f.id === value)
+                      if (selectedFile) {
+                        setFile(selectedFile)
+                      }
+                    }}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Choose a file..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {driveFiles.map((driveFile) => (
+                        <SelectItem key={driveFile.id} value={driveFile.id}>
+                          <div className="flex flex-col">
+                            <span>{driveFile.name}</span>
+                            <span className="text-xs text-muted-foreground">
+                              {driveFile.mimeType} • Modified: {new Date(driveFile.modifiedTime).toLocaleDateString()}
+                            </span>
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {file && (
+                    <Card className="w-full">
+                      <CardContent className="px-2 py-3">
+                        <div className="flex flex-col gap-2">
+                          <CardDescription>Selected File</CardDescription>
+                          <div className="text-sm">
+                            <p><strong>Name:</strong> {file.name}</p>
+                            <p><strong>Type:</strong> {file.mimeType}</p>
+                            <p><strong>Modified:</strong> {new Date(file.modifiedTime).toLocaleString()}</p>
+                            <p><strong>ID:</strong> {file.id}</p>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
+                </>
+              ) : (
+                <GoogleDriveFiles />
+              )}
+            </div>
+          )}
           <ActionButton
             currentService={title}
             nodeConnection={nodeConnection}
