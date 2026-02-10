@@ -62,13 +62,13 @@ const EditorCanvasIconHelper = ({ type }: Props) => {
           size={30}
         />
       )
-    case 'Custom Webhook':
-      return (
-        <Webhook
-          className="flex-shrink-0"
-          size={30}
-        />
-      )
+    // case 'Custom Webhook':
+    //   return (
+    //     <Webhook
+    //       className="flex-shrink-0"
+    //       size={30}
+    //     />
+    //   )
     case 'Google Calendar':
       return (
         <Calendar

@@ -8,6 +8,7 @@ type BillingProviderProps = {
   tier: string
   setCredits: React.Dispatch<React.SetStateAction<string>>
   setTier: React.Dispatch<React.SetStateAction<string>>
+  refreshBillingData: () => Promise<void>
 }
 
 const initialValues: BillingProviderProps = {
@@ -15,6 +16,7 @@ const initialValues: BillingProviderProps = {
   setCredits: () => undefined,
   tier: 'Free',
   setTier: () => undefined,
+  refreshBillingData: async () => undefined,
 }
 
 type WithChildProps = {
@@ -28,42 +30,48 @@ export const BillingProvider = ({ children }: WithChildProps) => {
   const [credits, setCredits] = React.useState(initialValues.credits)
   const [tier, setTier] = React.useState(initialValues.tier)
 
-  React.useEffect(() => {
-    const fetchUserBillingData = async () => {
-      try {
-        console.log('BillingProvider: Fetching user billing data...');
-        const data = await onPaymentDetails()
-        console.log('BillingProvider: Received data:', data);
+  const fetchUserBillingData = React.useCallback(async () => {
+    try {
+      console.log('BillingProvider: Fetching user billing data...');
+      const data = await onPaymentDetails()
+      console.log('BillingProvider: Received data:', data);
+      
+      if (data) {
+        const newCredits = data.credits?.toString() || '0';
+        const newTier = data.tier || 'Free';
         
-        if (data) {
-          const newCredits = data.credits?.toString() || '0';
-          const newTier = data.tier || 'Free';
-          
-          console.log('BillingProvider: Setting credits to:', newCredits);
-          console.log('BillingProvider: Setting tier to:', newTier);
-          
-          setCredits(newCredits)
-          setTier(newTier)
-        } else {
-          console.log('BillingProvider: No data received, using defaults');
-          setCredits('0')
-          setTier('Free')
-        }
-      } catch (error) {
-        console.error('BillingProvider: Failed to fetch billing data:', error)
+        console.log('BillingProvider: Setting credits to:', newCredits);
+        console.log('BillingProvider: Setting tier to:', newTier);
+        
+        setCredits(newCredits)
+        setTier(newTier)
+      } else {
+        console.log('BillingProvider: No data received, using defaults');
         setCredits('0')
         setTier('Free')
       }
+    } catch (error) {
+      console.error('BillingProvider: Failed to fetch billing data:', error)
+      setCredits('0')
+      setTier('Free')
     }
-
-    fetchUserBillingData()
   }, [])
+
+  React.useEffect(() => {
+    fetchUserBillingData()
+  }, [fetchUserBillingData])
+
+  // Add a function to refresh billing data
+  const refreshBillingData = React.useCallback(async () => {
+    await fetchUserBillingData()
+  }, [fetchUserBillingData])
 
   const values = {
     credits,
     setCredits,
     tier,
     setTier,
+    refreshBillingData,
   }
 
   return <Provider value={values}>{children}</Provider>

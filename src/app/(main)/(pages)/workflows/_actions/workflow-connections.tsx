@@ -125,6 +125,19 @@ export const onCreateNodeTemplate = async (
 
     if (response) return 'Notion template saved';
   }
+
+  if (type === 'Trigger') {
+    const response = await db.workflows.update({
+      where: {
+        id: workflowId,
+      },
+      data: {
+        triggerTemplate: content,
+      },
+    });
+
+    if (response) return 'Trigger configuration saved';
+  }
 };
 
 

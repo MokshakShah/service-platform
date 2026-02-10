@@ -17,12 +17,27 @@ export type ConnectionProviderProps = {
     workspaceName: string
     content: ''
   }
+  triggerNode: {
+    triggerType: string
+    webhookUrl: string
+    description: string
+  }
+  emailNode: {
+    recipientEmail: string
+    subject: string
+    body: string
+    attachments: File[]
+    senderEmail: string
+  }
   workflowTemplate: {
     discord?: string
     notion?: string
     slack?: string
+    email?: string
   }
   setNotionNode: React.Dispatch<React.SetStateAction<any>>
+  setTriggerNode: React.Dispatch<React.SetStateAction<any>>
+  setEmailNode: React.Dispatch<React.SetStateAction<any>>
   slackNode: {
     appId: string
     authedUserId: string
@@ -39,6 +54,7 @@ export type ConnectionProviderProps = {
       discord?: string
       notion?: string
       slack?: string
+      email?: string
     }>
   >
   isLoading: boolean
@@ -63,10 +79,23 @@ const InitialValues: ConnectionProviderProps = {
     workspaceName: '',
     content: '',
   },
+  triggerNode: {
+    triggerType: 'webhook',
+    webhookUrl: '',
+    description: '',
+  },
+  emailNode: {
+    recipientEmail: '',
+    subject: '',
+    body: '',
+    attachments: [],
+    senderEmail: '',
+  },
   workflowTemplate: {
     discord: '',
     notion: '',
     slack: '',
+    email: '',
   },
   slackNode: {
     appId: '',
@@ -82,6 +111,8 @@ const InitialValues: ConnectionProviderProps = {
   setGoogleNode: () => undefined,
   setDiscordNode: () => undefined,
   setNotionNode: () => undefined,
+  setTriggerNode: () => undefined,
+  setEmailNode: () => undefined,
   setSlackNode: () => undefined,
   setIsLoading: () => undefined,
   setWorkFlowTemplate: () => undefined,
@@ -94,6 +125,8 @@ export const ConnectionsProvider = ({ children }: ConnectionWithChildProps) => {
   const [discordNode, setDiscordNode] = useState(InitialValues.discordNode)
   const [googleNode, setGoogleNode] = useState(InitialValues.googleNode)
   const [notionNode, setNotionNode] = useState(InitialValues.notionNode)
+  const [triggerNode, setTriggerNode] = useState(InitialValues.triggerNode)
+  const [emailNode, setEmailNode] = useState(InitialValues.emailNode)
   const [slackNode, setSlackNode] = useState(InitialValues.slackNode)
   const [isLoading, setIsLoading] = useState(InitialValues.isLoading)
   const [workflowTemplate, setWorkFlowTemplate] = useState(
@@ -107,6 +140,10 @@ export const ConnectionsProvider = ({ children }: ConnectionWithChildProps) => {
     setGoogleNode,
     notionNode,
     setNotionNode,
+    triggerNode,
+    setTriggerNode,
+    emailNode,
+    setEmailNode,
     slackNode,
     setSlackNode,
     isLoading,

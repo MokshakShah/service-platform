@@ -89,4 +89,6 @@ export const nodeMapper: Record<string, string> = {
   Slack: 'slackNode',
   Discord: 'discordNode',
   'Google Drive': 'googleNode',
+  Trigger: 'triggerNode',
+  Email: 'emailNode',
 }

@@ -17,6 +17,7 @@ type Props = {
   callback?: () => void
   connected: {} & any
   action?: React.ReactNode
+  onDisconnect?: () => void
 }
 
 const ConnectionCard = ({
@@ -26,6 +27,7 @@ const ConnectionCard = ({
   title,
   connected,
   action,
+  onDisconnect,
 }: Props) => {
   return (
     <Card className="flex w-full items-center justify-between">
@@ -46,9 +48,19 @@ const ConnectionCard = ({
       </CardHeader>
       <div className="flex flex-col items-center gap-2 p-4">
         {connected[type] ? (
-          <span className="rounded-lg bg-green-600 p-2 font-bold text-white">
-            Connected
-          </span>
+          <div className="flex flex-col gap-2">
+            <span className="rounded-lg bg-green-600 p-2 font-bold text-white text-center">
+              Connected
+            </span>
+            {onDisconnect && (
+              <button
+                onClick={onDisconnect}
+                className="rounded-lg bg-red-600 p-2 font-bold text-white hover:bg-red-700 transition-colors"
+              >
+                Disconnect
+              </button>
+            )}
+          </div>
         ) : (
           <>
             {action || (

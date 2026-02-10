@@ -57,6 +57,10 @@ export async function POST(req: NextRequest) {
     })
     
     const data = await req.json()
+    
+    // Get the base URL from environment or default to HTTPS localhost
+    const baseUrl = process.env.NEXT_PUBLIC_URL || 'https://localhost:3000'
+    
     const session = await stripe.checkout.sessions.create({
       line_items: [
         {
@@ -65,9 +69,11 @@ export async function POST(req: NextRequest) {
         },
       ],
       mode: 'subscription',
-      success_url:
-        'https://localhost:3000/billing?session_id={CHECKOUT_SESSION_ID}',
-      cancel_url: 'https://localhost:3000/billing',
+      success_url: `${baseUrl}/billing?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${baseUrl}/billing`,
+      metadata: {
+        userId: userId, // Store user ID for webhook processing
+      },
     })
     return NextResponse.json(session.url)
   } catch (error: any) {

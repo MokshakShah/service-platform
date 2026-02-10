@@ -113,6 +113,34 @@ export const getDiscordConnectionUrl = async () => {
   }
 }
 
+export const onDiscordDisconnect = async (userId: string) => {
+  try {
+    if (!userId) {
+      throw new Error('User not authenticated')
+    }
+
+    // Delete Discord webhook and its connections
+    await db.discordWebhook.deleteMany({
+      where: {
+        userId: userId,
+      },
+    })
+
+    // Delete Discord connections
+    await db.connections.deleteMany({
+      where: {
+        userId: userId,
+        type: 'Discord',
+      },
+    })
+
+    return { success: true, message: 'Discord disconnected successfully' }
+  } catch (error: any) {
+    console.error('Error disconnecting Discord:', error)
+    return { success: false, message: error.message || 'Failed to disconnect Discord' }
+  }
+}
+
 export const postContentToWebHook = async (content: string, url: string) => {
   // console.log(content)
   if (content != '') {
@@ -123,4 +151,35 @@ export const postContentToWebHook = async (content: string, url: string) => {
     return { message: 'failed request' }
   }
   return { message: 'String empty' }
+}
+
+export const postContentWithFileToWebHook = async (
+  content: string, 
+  url: string, 
+  file?: any
+) => {
+  try {
+    if (!content && !file) {
+      return { message: 'No content or file provided' }
+    }
+
+    // If there's a file, include only the file name and link
+    let messageContent = content
+    if (file && file.name) {
+      const fileInfo = `\n\n📁 **${file.name}**\n🔗 [View File](https://drive.google.com/file/d/${file.id}/view)`
+      messageContent = messageContent + fileInfo
+    }
+
+    const posted = await axios.post(url, { 
+      content: messageContent || 'File shared from Google Drive'
+    })
+    
+    if (posted) {
+      return { message: 'success' }
+    }
+    return { message: 'failed request' }
+  } catch (error: any) {
+    console.error('Error posting to Discord webhook:', error)
+    return { message: 'failed request', error: error.message }
+  }
 }

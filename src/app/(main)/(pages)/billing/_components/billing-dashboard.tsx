@@ -9,7 +9,7 @@ import CreditTracker from './creadits-tracker'
 type Props = {}
 
 const BillingDashboard = (props: Props) => {
-  const { credits, tier } = useBilling()
+  const { credits, tier, refreshBillingData } = useBilling()
   const [stripeProducts, setStripeProducts] = useState<any>([])
   const [loading, setLoading] = useState<boolean>(false)
 
@@ -24,7 +24,9 @@ const BillingDashboard = (props: Props) => {
 
   useEffect(() => {
     onStripeProducts()
-  }, [])
+    // Refresh billing data when component mounts to get latest subscription info
+    refreshBillingData()
+  }, [refreshBillingData])
 
   const onPayment = async (id: string) => {
     const { data } = await axios.post(
@@ -43,6 +45,19 @@ const BillingDashboard = (props: Props) => {
 
   return (
     <>
+      {/* Debug/Manual refresh button */}
+      <div className="p-4 bg-gray-100 rounded mb-4">
+        <p className="text-sm text-gray-600 mb-2">
+          Current: {tier} tier with {credits} credits
+        </p>
+        <button 
+          onClick={refreshBillingData}
+          className="bg-blue-500 text-white px-3 py-1 rounded text-sm hover:bg-blue-600"
+        >
+          Refresh Billing Data
+        </button>
+      </div>
+      
       {/* {loading ? (
         <div className="absolute flex h-full w-full items-center justify-center">
           <svg

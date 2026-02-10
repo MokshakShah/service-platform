@@ -4,6 +4,34 @@ import { Option } from '@/components/ui/multiple-selector'
 import { db } from '@/lib/db'
 import axios from 'axios'
 
+export const onSlackDisconnect = async (userId: string) => {
+  try {
+    if (!userId) {
+      throw new Error('User not authenticated')
+    }
+
+    // Delete Slack connection and its connections
+    await db.slack.deleteMany({
+      where: {
+        userId: userId,
+      },
+    })
+
+    // Delete Slack connections
+    await db.connections.deleteMany({
+      where: {
+        userId: userId,
+        type: 'Slack',
+      },
+    })
+
+    return { success: true, message: 'Slack disconnected successfully' }
+  } catch (error: any) {
+    console.error('Error disconnecting Slack:', error)
+    return { success: false, message: error.message || 'Failed to disconnect Slack' }
+  }
+}
+
 export const onSlackConnect = async (
   app_id: string,
   authed_user_id: string,
@@ -122,6 +150,36 @@ export const postMessageToSlack = async (
       .map((channel) => channel?.value)
       .forEach((channel) => {
         postMessageInSlackChannel(slackAccessToken, channel, content)
+      })
+  } catch (error) {
+    return { message: 'Message could not be sent to Slack' }
+  }
+
+  return { message: 'Success' }
+}
+
+// Enhanced function to post messages with Google Drive file information
+export const postMessageWithFileToSlack = async (
+  slackAccessToken: string,
+  selectedSlackChannels: Option[],
+  content: string,
+  file?: any
+): Promise<{ message: string }> => {
+  if (!content && !file) return { message: 'Content is empty' }
+  if (!selectedSlackChannels?.length) return { message: 'Channel not selected' }
+
+  // If there's a file, include only the file name and link
+  let messageContent = content
+  if (file && file.name) {
+    const fileInfo = `\n\n📁 *${file.name}*\n🔗 <https://drive.google.com/file/d/${file.id}/view|View File>`
+    messageContent = messageContent + fileInfo
+  }
+
+  try {
+    selectedSlackChannels
+      .map((channel) => channel?.value)
+      .forEach((channel) => {
+        postMessageInSlackChannel(slackAccessToken, channel, messageContent || 'File shared from Google Drive')
       })
   } catch (error) {
     return { message: 'Message could not be sent to Slack' }

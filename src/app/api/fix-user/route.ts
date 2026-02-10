@@ -1,35 +1,53 @@
 import { NextResponse } from 'next/server';
-import { auth } from '@clerk/nextjs/server';
+import { auth, currentUser } from '@clerk/nextjs/server';
 import { db } from '@/lib/db';
 
 export async function POST() {
     try {
         const { userId } = await auth();
-        if (!userId) {
+        const user = await currentUser();
+        
+        console.log('Fix user - userId:', userId);
+        console.log('Fix user - user:', user);
+        
+        if (!userId || !user) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
+        // Get user's actual email and name from Clerk
+        const email = user.emailAddresses?.[0]?.emailAddress || 'temp@example.com';
+        const name = user.firstName || user.username || 'User';
+
         // Create or update user with proper defaults
-        const user = await db.user.upsert({
+        const dbUser = await db.user.upsert({
             where: { clerkId: userId },
             update: {
+                email,
+                name,
                 credits: '10',
                 tier: 'Free',
             },
             create: {
                 clerkId: userId,
-                email: 'temp@example.com', // You can update this later
-                name: 'User',
+                email,
+                name,
+                profileImage: user.imageUrl || '',
                 credits: '10',
                 tier: 'Free',
             },
         });
 
+        console.log('Fix user - created/updated user:', dbUser);
+
         return NextResponse.json({
             message: 'User fixed successfully',
             user: {
-                credits: user.credits,
-                tier: user.tier
+                id: dbUser.id,
+                clerkId: dbUser.clerkId,
+                email: dbUser.email,
+                name: dbUser.name,
+                credits: dbUser.credits,
+                tier: dbUser.tier
             }
         });
     } catch (error) {

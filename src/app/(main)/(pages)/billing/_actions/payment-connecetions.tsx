@@ -18,9 +18,28 @@ export const onPaymentDetails = async () => {
     });
     
     console.log('onPaymentDetails: Database result:', connection);
+    
+    // If no user found, return default values to prevent UI issues
+    if (!connection) {
+      console.log('onPaymentDetails: No user found in database, returning defaults');
+      return {
+        credits: '0',
+        tier: 'Free',
+        clerkId: userId,
+        email: '',
+        name: 'User'
+      };
+    }
+    
     return connection;
   } catch (error) {
     console.error('onPaymentDetails: Error:', error);
-    return null;
+    return {
+      credits: '0',
+      tier: 'Free',
+      clerkId: userId || '',
+      email: '',
+      name: 'User'
+    };
   }
 };
