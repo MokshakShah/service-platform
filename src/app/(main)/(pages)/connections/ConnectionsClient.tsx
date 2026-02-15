@@ -3,9 +3,9 @@ import { CONNECTIONS } from '@/lib/constant';
 import React from 'react';
 import ConnectionCard from './_components/connection-card';
 import { useUser } from '@clerk/nextjs';
-import { onDiscordConnect, onDiscordDisconnect } from './_actions/discord-connection';
-import { onNotionConnect, onNotionDisconnect } from './_actions/notion-connection';
-import { onSlackConnect, onSlackDisconnect } from './_actions/slack-connection';
+import { onDiscordConnect } from './_actions/discord-connection';
+import { onNotionConnect } from './_actions/notion-connection';
+import { onSlackConnect } from './_actions/slack-connection';
 import { getUserData } from './_actions/get-user';
 import Link from 'next/link';
 
@@ -64,40 +64,6 @@ const ConnectionsClient = (props: Props) => {
 
   const { user } = useUser();
   const [connections, setConnections] = React.useState<any>({});
-
-  const handleDisconnect = async (serviceType: string) => {
-    if (!user) return;
-
-    try {
-      let result;
-      switch (serviceType) {
-        case 'Discord':
-          result = await onDiscordDisconnect(user.id);
-          break;
-        case 'Notion':
-          result = await onNotionDisconnect(user.id);
-          break;
-        case 'Slack':
-          result = await onSlackDisconnect(user.id);
-          break;
-        default:
-          return;
-      }
-
-      if (result.success) {
-        // Update connections state to reflect disconnection
-        setConnections((prev: any) => ({
-          ...prev,
-          [serviceType]: false,
-        }));
-        console.log(result.message);
-      } else {
-        console.error('Disconnect failed:', result.message);
-      }
-    } catch (error) {
-      console.error('Error disconnecting service:', error);
-    }
-  };
 
   React.useEffect(() => {
     if (!user) return;
@@ -194,7 +160,6 @@ const ConnectionsClient = (props: Props) => {
                 icon={connection.image}
                 type={connection.title}
                 connected={connections}
-                onDisconnect={() => handleDisconnect(connection.title)}
                 action={
                   href && href !== '#' ? (
                     <Link
