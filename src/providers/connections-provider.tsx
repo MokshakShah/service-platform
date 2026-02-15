@@ -15,7 +15,7 @@ export type ConnectionProviderProps = {
     accessToken: string
     databaseId: string
     workspaceName: string
-    content: ''
+    content: string
   }
   triggerNode: {
     triggerType: string

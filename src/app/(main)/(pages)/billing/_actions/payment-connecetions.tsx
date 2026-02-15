@@ -4,8 +4,10 @@ import { db } from '@/lib/db';
 import { auth } from '@clerk/nextjs/server';
 
 export const onPaymentDetails = async () => {
+  let userId: string | null | undefined = undefined;
   try {
-    const { userId } = await auth();
+    const authResult = await auth();
+    userId = authResult.userId ?? undefined;
     console.log('onPaymentDetails: userId:', userId);
     
     if (!userId) {
@@ -25,7 +27,7 @@ export const onPaymentDetails = async () => {
       return {
         credits: '0',
         tier: 'Free',
-        clerkId: userId,
+        clerkId: userId || '',
         email: '',
         name: 'User'
       };

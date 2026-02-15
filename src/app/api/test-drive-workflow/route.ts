@@ -40,7 +40,7 @@ export async function POST(request: Request) {
     let messageContent = `📁 **File from Google Drive**\n\n` +
       `**File:** ${file.name}\n` +
       `**Type:** ${file.mimeType}\n` +
-      `**Modified:** ${new Date(file.modifiedTime).toLocaleString()}\n\n`
+      `**Modified:** ${new Date(file.modifiedTime ?? '').toLocaleString()}\n\n`
     
     if (file.content && file.content.length > 0) {
       const maxLength = platform === 'discord' ? 1900 : 2000
@@ -110,7 +110,7 @@ export async function POST(request: Request) {
 
       if (notionConnection) {
         try {
-          let notionContent = `File: ${file.name} | Type: ${file.mimeType} | Modified: ${new Date(file.modifiedTime).toLocaleString()}`
+          let notionContent = `File: ${file.name} | Type: ${file.mimeType} | Modified: ${new Date(file.modifiedTime ?? '').toLocaleString()}`
           if (file.content) {
             notionContent += ` | Content: ${file.content.substring(0, 500)}${file.content.length > 500 ? '...' : ''}`
           }

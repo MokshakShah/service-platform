@@ -1,7 +1,73 @@
-'use server'
-import { clerkClient } from '@clerk/nextjs/server'
-import { auth } from '@clerk/nextjs/server'
-import { google } from 'googleapis'
+
+'use server';
+import { clerkClient } from '@clerk/nextjs/server';
+import { auth } from '@clerk/nextjs/server';
+import { google } from 'googleapis';
+
+// Create a Google Calendar event for the authenticated user
+export const createCalendarEvent = async ({
+  summary,
+  description,
+  startDateTime,
+  endDateTime,
+  timeZone = 'UTC',
+}: {
+  summary: string;
+  description?: string;
+  startDateTime: string; // ISO string
+  endDateTime: string;   // ISO string
+  timeZone?: string;
+}) => {
+  'use server';
+  try {
+    const oauth2Client = new google.auth.OAuth2(
+      process.env.GOOGLE_CLIENT_ID,
+      process.env.GOOGLE_CLIENT_SECRET,
+      process.env.OAUTH2_REDIRECT_URI
+    );
+
+    const { userId } = await auth();
+    if (!userId) return { error: 'User not found' };
+
+    const client = await clerkClient();
+    const clerkResponse = await client.users.getUserOauthAccessToken(
+      userId,
+      'oauth_google'
+    );
+
+    const accessToken = clerkResponse.data[0]?.token;
+    if (!accessToken) return { error: 'No access token found' };
+
+    oauth2Client.setCredentials({
+      access_token: accessToken,
+    });
+
+    const calendar = google.calendar({ version: 'v3', auth: oauth2Client });
+
+    const event = {
+      summary,
+      description,
+      start: {
+        dateTime: startDateTime,
+        timeZone,
+      },
+      end: {
+        dateTime: endDateTime,
+        timeZone,
+      },
+    };
+
+    const response = await calendar.events.insert({
+      calendarId: 'primary',
+      requestBody: event,
+    });
+
+    return { success: true, event: response.data };
+  } catch (error: any) {
+    console.error('Error creating calendar event:', error);
+    return { error: 'Failed to create calendar event', details: error?.message };
+  }
+};
 
 export const getFileMetaData = async () => {
   'use server'

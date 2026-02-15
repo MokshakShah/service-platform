@@ -152,15 +152,17 @@ export const getNotionDatabases = async (accessToken: string) => {
   try {
     const notion = new Client({ auth: accessToken })
 
-    // Search for databases
+    // Search for pages, then filter for databases
     const response = await notion.search({
       filter: {
-        value: 'database',
+        value: 'page',
         property: 'object'
       }
     })
 
-    return response.results
+    // Only return results where object === 'database'
+    const databases = response.results.filter((item: any) => item.object === 'database');
+    return databases;
   } catch (error: any) {
     console.error('Error fetching Notion databases:', error)
     return []

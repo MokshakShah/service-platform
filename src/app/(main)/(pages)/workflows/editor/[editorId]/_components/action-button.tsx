@@ -105,7 +105,7 @@ const ActionButton = ({
       }
 
       // Prepare attachments for API
-      let attachments = []
+      let attachments: any[] = []
       if (nodeConnection.emailNode.attachments && nodeConnection.emailNode.attachments.length > 0) {
         attachments = await Promise.all(
           nodeConnection.emailNode.attachments.map(async (file: File) => {

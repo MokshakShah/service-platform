@@ -14,20 +14,22 @@ export async function GET(request: Request) {
     
     console.log('Testing Notion API with token:', accessToken.substring(0, 20) + '...')
     
-    // Search for databases
+    // Search for pages, then filter for databases
     const response = await notion.search({
       filter: {
-        value: 'database',
+        value: 'page',
         property: 'object'
       }
     })
-    
-    console.log('Notion search response:', response)
-    
+
+    // Only return results where object === 'database'
+    const databases = response.results.filter((item: any) => item.object === 'database');
+    console.log('Notion search response:', databases)
+
     return NextResponse.json({
       success: true,
-      databases: response.results,
-      count: response.results.length
+      databases,
+      count: databases.length
     })
   } catch (error: any) {
     console.error('Error testing Notion databases:', error)

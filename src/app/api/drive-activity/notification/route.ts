@@ -70,7 +70,7 @@ export async function POST(req: NextRequest) {
               messageContent = `📁 **File Update from Google Drive**\n\n` +
                 `**File:** ${file.name}\n` +
                 `**Type:** ${file.mimeType}\n` +
-                `**Modified:** ${new Date(file.modifiedTime).toLocaleString()}\n\n`
+                `**Modified:** ${new Date(file.modifiedTime ?? '').toLocaleString()}\n\n`
               
               if (file.content && file.content.length > 0) {
                 // Truncate content if too long for Discord/Slack
@@ -129,7 +129,7 @@ export async function POST(req: NextRequest) {
               let notionContent = ''
               if (fileContent?.success) {
                 const file = fileContent.file
-                notionContent = `File: ${file.name} | Type: ${file.mimeType} | Modified: ${new Date(file.modifiedTime).toLocaleString()}`
+                notionContent = `File: ${file.name} | Type: ${file.mimeType} | Modified: ${new Date(file.modifiedTime ?? '').toLocaleString()}`
                 if (file.content) {
                   notionContent += ` | Content: ${file.content.substring(0, 500)}${file.content.length > 500 ? '...' : ''}`
                 }
