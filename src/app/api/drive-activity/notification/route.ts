@@ -57,7 +57,7 @@ export async function POST(req: NextRequest) {
           console.log('File content result:', fileContent?.success ? 'Success' : 'Failed')
         }
 
-        workflows.map(async (flow) => {
+        workflows.map(async (flow: any) => {
           const flowPath = JSON.parse(flow.flowPath!)
           let current = 0
           
