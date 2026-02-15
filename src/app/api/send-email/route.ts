@@ -37,26 +37,26 @@ export async function POST(req: NextRequest) {
     }
 
     // Check if email service is configured
-    if (!process.env.EMAIL_HOST || !process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+    if (!process.env.SMTP_HOST || !process.env.SMTP_USER || !process.env.SMTP_PASS) {
       return NextResponse.json({ 
         error: 'Email service not configured. Please contact administrator.' 
       }, { status: 500 });
     }
 
     // Create transporter
-    const transporter = nodemailer.createTransporter({
-      host: process.env.EMAIL_HOST,
-      port: parseInt(process.env.EMAIL_PORT || '587'),
-      secure: process.env.EMAIL_SECURE === 'true', // true for 465, false for other ports
+    const transporter = nodemailer.createTransport({
+      host: process.env.SMTP_HOST,
+      port: parseInt(process.env.SMTP_PORT || '587'),
+      secure: false, // set to true if using port 465
       auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASS,
       },
     });
 
     // Prepare email options
     const mailOptions: any = {
-      from: `"${user.firstName || 'Fuzzie User'}" <${process.env.EMAIL_USER}>`, // Use configured email as sender
+      from: `"${user.firstName || 'Fuzzie User'}" <${process.env.SMTP_FROM || process.env.SMTP_USER}>`, // Use configured email as sender
       replyTo: senderEmail, // Set user's email as reply-to
       to: recipientEmail,
       subject: subject,

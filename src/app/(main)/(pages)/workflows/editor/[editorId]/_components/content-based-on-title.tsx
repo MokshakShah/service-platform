@@ -69,7 +69,7 @@ const ContentBasedOnTitle = ({
         senderEmail: user.emailAddresses[0].emailAddress,
       }))
     }
-  }, [title, user, nodeConnection])
+  }, [title, user])
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files

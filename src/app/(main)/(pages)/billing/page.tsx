@@ -98,7 +98,13 @@ const Billing = async (props: Props) => {
     return <BillingDashboard />;
   } catch (error: any) {
     console.error('Error in Billing page:', error);
-    return <div>Error: {error.message}</div>;
+    let errorMessage = 'Unknown error';
+    if (error && typeof error === 'object' && 'message' in error) {
+      errorMessage = (error as any).message;
+    } else if (typeof error === 'string') {
+      errorMessage = error;
+    }
+    return <div>Error: {errorMessage}</div>;
   }
 };
 
