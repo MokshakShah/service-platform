@@ -240,23 +240,26 @@ const ContentBasedOnTitle = ({
                   </p>
                 </div>
 
-                {/* Recipient Email */}
+                {/* Recipient Emails (Multiple) */}
                 <div>
-                  <Label htmlFor="recipientEmail" className="text-sm font-medium">
-                    To (Recipient Email) *
+                  <Label htmlFor="recipientEmails" className="text-sm font-medium">
+                    To (Recipient Emails, comma separated) *
                   </Label>
                   <Input
-                    id="recipientEmail"
-                    type="email"
-                    placeholder="recipient@example.com"
-                    value={nodeConnectionType.recipientEmail}
+                    id="recipientEmails"
+                    type="text"
+                    placeholder="recipient1@example.com, recipient2@example.com"
+                    value={nodeConnectionType.recipientEmails || ''}
                     onChange={(event) => {
                       nodeConnection.setEmailNode((prev: any) => ({
                         ...prev,
-                        recipientEmail: event.target.value,
+                        recipientEmails: event.target.value,
                       }))
                     }}
                   />
+                  <p className="text-xs text-gray-500 mt-1">
+                    Separate multiple email addresses with commas.
+                  </p>
                 </div>
 
                 {/* Subject */}
@@ -411,11 +414,21 @@ const ContentBasedOnTitle = ({
                 )}
 
                 {nodeConnectionType.triggerType === 'schedule' && (
-                  <div>
+                  <div className="flex flex-col gap-2">
+                    <label className="text-sm font-medium">Schedule Date</label>
+                    <Input
+                      type="date"
+                      value={nodeConnectionType.scheduleDate || ''}
+                      onChange={(event) => {
+                        nodeConnection.setTriggerNode((prev: any) => ({
+                          ...prev,
+                          scheduleDate: event.target.value,
+                        }))
+                      }}
+                    />
                     <label className="text-sm font-medium">Schedule Time</label>
                     <Input
-                      type="text"
-                      placeholder="e.g. 0 9 * * * (cron) or every 3 hours"
+                      type="time"
                       value={nodeConnectionType.scheduleTime || ''}
                       onChange={(event) => {
                         nodeConnection.setTriggerNode((prev: any) => ({
@@ -425,7 +438,7 @@ const ContentBasedOnTitle = ({
                       }}
                     />
                     <p className="text-xs text-gray-500 mt-1">
-                      Enter a cron expression or interval (e.g., "every 3 hours").
+                      Select the date and time when this workflow should run. For recurring schedules, use cron or interval in advanced settings.
                     </p>
                   </div>
                 )}
