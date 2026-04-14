@@ -400,17 +400,36 @@ const ContentBasedOnTitle = ({
                     <Input
                       type="text"
                       placeholder="https://your-webhook-url.com"
-                      value={nodeConnectionType.webhookUrl}
+                      value={nodeConnectionType.webhookUrl || 'https://your-webhook-url.com/unique-id'}
+                      disabled
+                      readOnly
+                    />
+                    <p className="text-xs text-gray-500 mt-1">
+                      Copy this URL and use it in your external service to trigger this workflow.
+                    </p>
+                  </div>
+                )}
+
+                {nodeConnectionType.triggerType === 'schedule' && (
+                  <div>
+                    <label className="text-sm font-medium">Schedule Time</label>
+                    <Input
+                      type="text"
+                      placeholder="e.g. 0 9 * * * (cron) or every 3 hours"
+                      value={nodeConnectionType.scheduleTime || ''}
                       onChange={(event) => {
                         nodeConnection.setTriggerNode((prev: any) => ({
                           ...prev,
-                          webhookUrl: event.target.value,
+                          scheduleTime: event.target.value,
                         }))
                       }}
                     />
+                    <p className="text-xs text-gray-500 mt-1">
+                      Enter a cron expression or interval (e.g., "every 3 hours").
+                    </p>
                   </div>
                 )}
-                
+
                 <div>
                   <label className="text-sm font-medium">Description</label>
                   <Input

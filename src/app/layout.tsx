@@ -10,7 +10,7 @@ import { BillingProvider } from '@/providers/billing-provider'
 const font = DM_Sans({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'Fuzzie.',
+  title: 'Service Platform.',
   description: 'Automate Your Work With Fuzzie.',
 }
 
