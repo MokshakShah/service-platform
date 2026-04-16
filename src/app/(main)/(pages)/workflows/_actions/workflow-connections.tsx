@@ -1,8 +1,43 @@
 'use server';
 import { Option } from '@/components/ui/multiple-selector';
 import { db } from '@/lib/db';
-import { headers } from 'next/headers';
 import { auth } from '@clerk/nextjs/server';
+import axios from 'axios';
+
+const registerHourlyScheduler = async () => {
+  if (!process.env.CRON_JOB_KEY || !process.env.NEXT_PUBLIC_BASE_URL) {
+    return;
+  }
+
+  try {
+    await axios.put(
+      'https://api.cron-job.org/jobs',
+      {
+        job: {
+          url: `${process.env.NEXT_PUBLIC_BASE_URL}/api/scheduled-triggers`,
+          enabled: 'true',
+          schedule: {
+            timezone: 'UTC',
+            expiresAt: 0,
+            hours: [-1],
+            mdays: [-1],
+            minutes: [0, 4, 8, 12, 16, 20, 24, 28, 32, 36, 40, 44, 48, 52, 56],
+            months: [-1],
+            wdays: [-1],
+          },
+        },
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${process.env.CRON_JOB_KEY}`,
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+  } catch (error) {
+    console.error('Failed to register hourly scheduler:', error);
+  }
+};
 
 export const getGoogleListener = async () => {
   const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || ''}/api/google-listener`, { cache: 'no-store' });
@@ -126,17 +161,99 @@ export const onCreateNodeTemplate = async (
     if (response) return 'Notion template saved';
   }
 
-  if (type === 'Trigger') {
+  if (type === 'Email') {
+    let parsedEmailConfig: any = null;
+
+    try {
+      parsedEmailConfig = JSON.parse(content);
+    } catch (error) {
+      return 'Invalid email configuration';
+    }
+
+    const existing = await db.workflows.findUnique({
+      where: {
+        id: workflowId,
+      },
+      select: {
+        triggerTemplate: true,
+      },
+    });
+
+    let existingTriggerTemplate: any = {};
+
+    if (existing?.triggerTemplate) {
+      try {
+        existingTriggerTemplate = JSON.parse(existing.triggerTemplate);
+      } catch (error) {
+        existingTriggerTemplate = {};
+      }
+    }
+
     const response = await db.workflows.update({
       where: {
         id: workflowId,
       },
       data: {
-        triggerTemplate: content,
+        triggerTemplate: JSON.stringify({
+          ...existingTriggerTemplate,
+          emailConfig: parsedEmailConfig,
+        }),
       },
     });
 
-    if (response) return 'Trigger configuration saved';
+    if (response) return 'Email template saved';
+  }
+
+  if (type === 'Trigger') {
+    let parsedContent: any = null;
+
+    try {
+      parsedContent = JSON.parse(content);
+    } catch (error) {
+      return 'Invalid trigger configuration';
+    }
+
+    if (!parsedContent?.scheduleDate || !parsedContent?.scheduleTime) {
+      return 'Please select both schedule date and schedule time';
+    }
+
+    const existing = await db.workflows.findUnique({
+      where: {
+        id: workflowId,
+      },
+      select: {
+        triggerTemplate: true,
+      },
+    });
+
+    let existingTriggerTemplate: any = {};
+
+    if (existing?.triggerTemplate) {
+      try {
+        existingTriggerTemplate = JSON.parse(existing.triggerTemplate);
+      } catch (error) {
+        existingTriggerTemplate = {};
+      }
+    }
+
+    const response = await db.workflows.update({
+      where: {
+        id: workflowId,
+      },
+      data: {
+        triggerTemplate: JSON.stringify({
+          ...existingTriggerTemplate,
+          ...parsedContent,
+          triggerType: 'schedule',
+          executedAt: null,
+        }),
+      },
+    });
+
+    if (response) {
+      await registerHourlyScheduler();
+      return 'Trigger configuration saved';
+    }
   }
 };
 

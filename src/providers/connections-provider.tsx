@@ -19,7 +19,8 @@ export type ConnectionProviderProps = {
   }
   triggerNode: {
     triggerType: string
-    webhookUrl: string
+    scheduleDate: string
+    scheduleTime: string
     description: string
   }
   emailNode: {
@@ -80,8 +81,9 @@ const InitialValues: ConnectionProviderProps = {
     content: '',
   },
   triggerNode: {
-    triggerType: 'webhook',
-    webhookUrl: '',
+    triggerType: 'schedule',
+    scheduleDate: '',
+    scheduleTime: '',
     description: '',
   },
   emailNode: {

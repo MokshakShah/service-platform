@@ -8,6 +8,7 @@ import { onCreateNodeTemplate } from '../../../_actions/workflow-connections'
 import { toast } from 'sonner'
 import { onCreateNewPageInDatabase } from '@/app/(main)/(pages)/connections/_actions/notion-connection';
 import { postMessageToSlack, postMessageWithFileToSlack } from '@/app/(main)/(pages)/connections/_actions/slack-connection'
+import { useEditor } from '@/providers/editor-provider'
 
 type Props = {
   currentService: string
@@ -25,6 +26,42 @@ const ActionButton = ({
   file,
 }: Props) => {
   const pathname = usePathname()
+  const { state } = useEditor()
+
+  const isCurrentNodeConnectedToTrigger = useCallback(() => {
+    const selectedNodeId = state.editor.selectedNode.id
+    if (!selectedNodeId) return false
+
+    const nodeTypeById = new Map(
+      state.editor.elements.map((node) => [node.id, node.type])
+    )
+
+    const incomingByTarget = new Map<string, string[]>()
+    state.editor.edges.forEach((edge) => {
+      const sources = incomingByTarget.get(edge.target) ?? []
+      sources.push(edge.source)
+      incomingByTarget.set(edge.target, sources)
+    })
+
+    const queue = [selectedNodeId]
+    const visited = new Set<string>()
+
+    while (queue.length) {
+      const currentId = queue.shift()!
+      if (visited.has(currentId)) continue
+      visited.add(currentId)
+
+      const incomingSources = incomingByTarget.get(currentId) ?? []
+      for (const sourceId of incomingSources) {
+        if (nodeTypeById.get(sourceId) === 'Trigger') {
+          return true
+        }
+        queue.push(sourceId)
+      }
+    }
+
+    return false
+  }, [state.editor.selectedNode.id, state.editor.elements, state.editor.edges])
 
   const onSendDiscordMessage = useCallback(async () => {
     const response = await postContentWithFileToWebHook(
@@ -246,8 +283,9 @@ const ActionButton = ({
 
     if (currentService === 'Trigger') {
       const triggerConfig = {
-        triggerType: nodeConnection.triggerNode.triggerType,
-        webhookUrl: nodeConnection.triggerNode.webhookUrl,
+        triggerType: 'schedule',
+        scheduleDate: nodeConnection.triggerNode.scheduleDate,
+        scheduleTime: nodeConnection.triggerNode.scheduleTime,
         description: nodeConnection.triggerNode.description,
       }
       
@@ -264,6 +302,20 @@ const ActionButton = ({
   }, [nodeConnection, channels])
 
   const renderActionButton = () => {
+    const connectedToTrigger =
+      currentService !== 'Trigger' && isCurrentNodeConnectedToTrigger()
+
+    if (connectedToTrigger) {
+      return (
+        <Button
+          onClick={onCreateLocalNodeTempate}
+          variant="outline"
+        >
+          Save
+        </Button>
+      )
+    }
+
     switch (currentService) {
       case 'Discord':
         return (
@@ -343,7 +395,7 @@ const ActionButton = ({
             onClick={onCreateLocalNodeTempate}
             variant="outline"
           >
-            Save Trigger
+            Save
           </Button>
         )
 

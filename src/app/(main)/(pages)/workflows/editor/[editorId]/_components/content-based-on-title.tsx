@@ -242,24 +242,21 @@ const ContentBasedOnTitle = ({
 
                 {/* Recipient Emails (Multiple) */}
                 <div>
-                  <Label htmlFor="recipientEmails" className="text-sm font-medium">
-                    To (Recipient Emails, comma separated) *
+                  <Label htmlFor="recipientEmail" className="text-sm font-medium">
+                    To (Recipient Email) *
                   </Label>
                   <Input
-                    id="recipientEmails"
-                    type="text"
-                    placeholder="recipient1@example.com, recipient2@example.com"
-                    value={nodeConnectionType.recipientEmails || ''}
+                    id="recipientEmail"
+                    type="email"
+                    placeholder="recipient@example.com"
+                    value={nodeConnectionType.recipientEmail || ''}
                     onChange={(event) => {
                       nodeConnection.setEmailNode((prev: any) => ({
                         ...prev,
-                        recipientEmails: event.target.value,
+                        recipientEmail: event.target.value,
                       }))
                     }}
                   />
-                  <p className="text-xs text-gray-500 mt-1">
-                    Separate multiple email addresses with commas.
-                  </p>
                 </div>
 
                 {/* Subject */}
@@ -375,73 +372,35 @@ const ContentBasedOnTitle = ({
             <>
               <p>Configure your workflow trigger</p>
               <div className="flex flex-col gap-3">
-                <div>
-                  <label className="text-sm font-medium">Trigger Type</label>
-                  <Select
-                    value={nodeConnectionType.triggerType}
-                    onValueChange={(value) => {
+                <div className="flex flex-col gap-2">
+                  <label className="text-sm font-medium">Schedule Date</label>
+                  <Input
+                    type="date"
+                    value={nodeConnectionType.scheduleDate || ''}
+                    onChange={(event) => {
                       nodeConnection.setTriggerNode((prev: any) => ({
                         ...prev,
-                        triggerType: value,
+                        triggerType: 'schedule',
+                        scheduleDate: event.target.value,
                       }))
                     }}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select trigger type..." />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="webhook">Webhook</SelectItem>
-                      <SelectItem value="manual">Manual</SelectItem>
-                      <SelectItem value="schedule">Schedule</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  />
+                  <label className="text-sm font-medium">Schedule Time</label>
+                  <Input
+                    type="time"
+                    value={nodeConnectionType.scheduleTime || ''}
+                    onChange={(event) => {
+                      nodeConnection.setTriggerNode((prev: any) => ({
+                        ...prev,
+                        triggerType: 'schedule',
+                        scheduleTime: event.target.value,
+                      }))
+                    }}
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    This workflow uses schedule trigger only. Cron checks run every 4 minutes for due tasks.
+                  </p>
                 </div>
-                
-                {nodeConnectionType.triggerType === 'webhook' && (
-                  <div>
-                    <label className="text-sm font-medium">Webhook URL</label>
-                    <Input
-                      type="text"
-                      placeholder="https://your-webhook-url.com"
-                      value={nodeConnectionType.webhookUrl || 'https://your-webhook-url.com/unique-id'}
-                      disabled
-                      readOnly
-                    />
-                    <p className="text-xs text-gray-500 mt-1">
-                      Copy this URL and use it in your external service to trigger this workflow.
-                    </p>
-                  </div>
-                )}
-
-                {nodeConnectionType.triggerType === 'schedule' && (
-                  <div className="flex flex-col gap-2">
-                    <label className="text-sm font-medium">Schedule Date</label>
-                    <Input
-                      type="date"
-                      value={nodeConnectionType.scheduleDate || ''}
-                      onChange={(event) => {
-                        nodeConnection.setTriggerNode((prev: any) => ({
-                          ...prev,
-                          scheduleDate: event.target.value,
-                        }))
-                      }}
-                    />
-                    <label className="text-sm font-medium">Schedule Time</label>
-                    <Input
-                      type="time"
-                      value={nodeConnectionType.scheduleTime || ''}
-                      onChange={(event) => {
-                        nodeConnection.setTriggerNode((prev: any) => ({
-                          ...prev,
-                          scheduleTime: event.target.value,
-                        }))
-                      }}
-                    />
-                    <p className="text-xs text-gray-500 mt-1">
-                      Select the date and time when this workflow should run. For recurring schedules, use cron or interval in advanced settings.
-                    </p>
-                  </div>
-                )}
 
                 <div>
                   <label className="text-sm font-medium">Description</label>
