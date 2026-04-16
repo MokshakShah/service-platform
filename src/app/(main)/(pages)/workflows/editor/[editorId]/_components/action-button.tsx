@@ -282,6 +282,26 @@ const ActionButton = ({
     }
 
     if (currentService === 'Trigger') {
+      if (!nodeConnection.triggerNode.scheduleDate || !nodeConnection.triggerNode.scheduleTime) {
+        toast.error('Please select schedule date and time')
+        return
+      }
+
+      const scheduledAt = new Date(
+        `${nodeConnection.triggerNode.scheduleDate}T${nodeConnection.triggerNode.scheduleTime}`
+      )
+      const minAllowed = new Date(Date.now() + 10 * 60 * 1000)
+
+      if (Number.isNaN(scheduledAt.getTime())) {
+        toast.error('Invalid schedule date or time')
+        return
+      }
+
+      if (scheduledAt < minAllowed) {
+        toast.error('Schedule must be at least 10 minutes in the future')
+        return
+      }
+
       const triggerConfig = {
         triggerType: 'schedule',
         scheduleDate: nodeConnection.triggerNode.scheduleDate,

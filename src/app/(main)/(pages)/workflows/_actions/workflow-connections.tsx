@@ -217,6 +217,19 @@ export const onCreateNodeTemplate = async (
       return 'Please select both schedule date and schedule time';
     }
 
+    const scheduledAt = new Date(
+      `${parsedContent.scheduleDate}T${parsedContent.scheduleTime}`
+    );
+    const minAllowed = new Date(Date.now() + 10 * 60 * 1000);
+
+    if (Number.isNaN(scheduledAt.getTime())) {
+      return 'Invalid schedule date or time';
+    }
+
+    if (scheduledAt < minAllowed) {
+      return 'Schedule must be at least 10 minutes in the future';
+    }
+
     const existing = await db.workflows.findUnique({
       where: {
         id: workflowId,

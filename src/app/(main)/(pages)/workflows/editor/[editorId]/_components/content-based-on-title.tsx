@@ -60,6 +60,14 @@ const ContentBasedOnTitle = ({
 
   const [driveFiles, setDriveFiles] = React.useState<any[]>([])
   const [selectedFileId, setSelectedFileId] = React.useState<string>('')
+  const now = new Date()
+  const minSchedule = new Date(now.getTime() + 10 * 60 * 1000)
+  const todayDate = now.toISOString().split('T')[0]
+  const minDate = todayDate
+  const minTimeForSelectedDate =
+    nodeConnection.triggerNode.scheduleDate === minSchedule.toISOString().split('T')[0]
+      ? `${String(minSchedule.getHours()).padStart(2, '0')}:${String(minSchedule.getMinutes()).padStart(2, '0')}`
+      : undefined
 
   // Initialize sender email when Email node is selected
   useEffect(() => {
@@ -376,6 +384,7 @@ const ContentBasedOnTitle = ({
                   <label className="text-sm font-medium">Schedule Date</label>
                   <Input
                     type="date"
+                    min={minDate}
                     value={nodeConnectionType.scheduleDate || ''}
                     onChange={(event) => {
                       nodeConnection.setTriggerNode((prev: any) => ({
@@ -388,6 +397,7 @@ const ContentBasedOnTitle = ({
                   <label className="text-sm font-medium">Schedule Time</label>
                   <Input
                     type="time"
+                    min={minTimeForSelectedDate}
                     value={nodeConnectionType.scheduleTime || ''}
                     onChange={(event) => {
                       nodeConnection.setTriggerNode((prev: any) => ({
@@ -398,7 +408,7 @@ const ContentBasedOnTitle = ({
                     }}
                   />
                   <p className="text-xs text-gray-500 mt-1">
-                    This workflow uses schedule trigger only. Cron checks run every 4 minutes for due tasks.
+                    This workflow uses schedule trigger only. Pick a time at least 10 minutes ahead. Cron checks run every 4 minutes.
                   </p>
                 </div>
 
