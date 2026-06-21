@@ -10,6 +10,7 @@ const nextConfig = {
     root: __dirname,
   },
   images: {
+    imageSizes: [15, 16, 32, 48, 64, 96, 128, 170, 256, 384, 600],
     remotePatterns: [
       {
         protocol: 'https',

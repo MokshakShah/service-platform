@@ -90,7 +90,7 @@ export const Card = ({
       }}
       className="max-w-5xl -mt-12 mx-auto h-[30rem] md:h-[40rem] w-full  p-6 bg-[#222222] rounded-[30px] shadow-2xl"
     >
-      <div className="bg-gray-100 h-full w-full rounded-2xl  gap-4 overflow-hidden p-4 transition-all ">
+      <div className="relative bg-gray-100 h-full w-full rounded-xl  gap-4 overflow-hidden p-4 transition-all ">
         <Image
           src="/temp-banner.png"
           fill

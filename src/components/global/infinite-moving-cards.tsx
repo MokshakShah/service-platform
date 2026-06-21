@@ -69,7 +69,6 @@ export const InfiniteMovingCards = ({
       }
     }
   }
-  console.log(items)
   return (
     <div
       ref={containerRef}
@@ -89,7 +88,7 @@ export const InfiniteMovingCards = ({
         {items.map((item, idx) => (
           <Image
             width={170}
-            height={1}
+            height={48}
             src={item.href}
             alt={item.href}
             className=" relative rounded-2xl  object-contain opacity-50"
